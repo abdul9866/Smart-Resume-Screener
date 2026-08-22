@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "dev": "tsx watch src/app.ts",
-    "build": "rimraf dist && tsc",
+    "build": "prisma generate --schema=../prisma/schema.prisma && rimraf dist && tsc",
     "start": "node dist/app.js",
     "test": "vitest run"
   },
@@ -26,6 +26,7 @@
     "@types/node": "^20.12.7",
     "@types/pdf-parse": "^1.1.4",
     "@types/supertest": "^6.0.2",
+    "prisma": "^5.12.1",
     "rimraf": "^5.0.5",
     "supertest": "^6.3.4",
     "tsx": "^4.7.2",
