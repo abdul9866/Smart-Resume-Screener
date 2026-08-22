@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Briefcase, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
+import API_BASE from '../services/api.js';
 
 const jobSchema = z.object({
   title: z.string().min(3, 'Job title must be at least 3 characters long'),
@@ -31,7 +32,7 @@ export default function CreateJob() {
   // Mutation to create job
   const mutation = useMutation({
     mutationFn: async (values: JobFormValues) => {
-      const res = await fetch('/api/jobs', {
+      const res = await fetch(`${API_BASE}/api/jobs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),

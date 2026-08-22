@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, UploadCloud, FileText, AlertCircle, Loader2, Sparkles, UserCheck, Briefcase } from 'lucide-react';
 import { Job, ScreeningResult } from '../types/index.js';
 import StatusBadge from '../components/StatusBadge.tsx';
+import API_BASE from '../services/api.js';
 
 export default function JobScreen() {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +17,7 @@ export default function JobScreen() {
   const { data: jobResponse, isLoading: isLoadingJob, error: jobError } = useQuery({
     queryKey: ['job', id],
     queryFn: async () => {
-      const res = await fetch(`/api/jobs/${id}`);
+      const res = await fetch(`${API_BASE}/api/jobs/${id}`);
       if (!res.ok) throw new Error('Failed to fetch job description.');
       return res.json();
     },
@@ -26,7 +27,7 @@ export default function JobScreen() {
   const { data: resultsResponse, isLoading: isLoadingResults } = useQuery({
     queryKey: ['job-results', id],
     queryFn: async () => {
-      const res = await fetch(`/api/jobs/${id}/results`);
+      const res = await fetch(`${API_BASE}/api/jobs/${id}/results`);
       if (!res.ok) throw new Error('Failed to fetch ranked results.');
       return res.json();
     },
@@ -38,7 +39,7 @@ export default function JobScreen() {
   // 3. Mutation for screening upload
   const screenMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const res = await fetch(`/api/jobs/${id}/screen`, {
+      const res = await fetch(`${API_BASE}/api/jobs/${id}/screen`, {
         method: 'POST',
         body: formData,
       });

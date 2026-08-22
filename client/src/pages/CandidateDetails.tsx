@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Mail, Phone, BookOpen, Briefcase, Award, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import { Candidate, ScreeningResult } from '../types/index.js';
 import ScoreBreakdownCard from '../components/ScoreBreakdownCard.tsx';
+import API_BASE from '../services/api.js';
 
 export default function CandidateDetails() {
   const { id } = useParams<{ id: string }>();
@@ -12,7 +13,7 @@ export default function CandidateDetails() {
   const { data: candidateResponse, isLoading, error } = useQuery({
     queryKey: ['candidate', id],
     queryFn: async () => {
-      const res = await fetch(`/api/candidates/${id}`);
+      const res = await fetch(`${API_BASE}/api/candidates/${id}`);
       if (!res.ok) throw new Error('Failed to load candidate profile.');
       return res.json();
     },

@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { Briefcase, Users, Award, TrendingUp, ChevronRight, Plus } from 'lucide-react';
 import { Job, Candidate } from '../types/index.js';
 import StatusBadge from '../components/StatusBadge.tsx';
+import API_BASE from '../services/api.js';
 
 export default function Dashboard() {
   // Fetch jobs
   const { data: jobsResponse, isLoading: isLoadingJobs, error: jobsError } = useQuery({
     queryKey: ['jobs'],
     queryFn: async () => {
-      const res = await fetch('/api/jobs');
+      const res = await fetch(`${API_BASE}/api/jobs`);
       if (!res.ok) throw new Error('Failed to fetch jobs.');
       return res.json();
     },
@@ -19,7 +20,7 @@ export default function Dashboard() {
   const { data: candidatesResponse, isLoading: isLoadingCandidates } = useQuery({
     queryKey: ['candidates'],
     queryFn: async () => {
-      const res = await fetch('/api/candidates');
+      const res = await fetch(`${API_BASE}/api/candidates`);
       if (!res.ok) throw new Error('Failed to fetch candidates.');
       return res.json();
     },
