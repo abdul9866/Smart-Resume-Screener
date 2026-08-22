@@ -1,0 +1,90 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../server/node_modules/.prisma/client"
+}
+
+model Job {
+  id               String            @id @default(uuid())
+  title            String
+  description      String
+  requirements     String?           // Stored as JSON string in SQLite
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  screeningResults ScreeningResult[]
+}
+
+model Candidate {
+  id             String            @id @default(uuid())
+  name           String
+  email          String?
+  phone          String?
+  resumeFileName String
+  resumeText     String
+  summary        String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  education      Education[]
+  experience     Experience[]
+  skills         CandidateSkill[]
+  screenings     ScreeningResult[]
+}
+
+model Education {
+  id          String    @id @default(uuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  institution String
+  degree      String?
+  field       String?
+  startYear   Int?
+  endYear     Int?
+}
+
+model Experience {
+  id          String    @id @default(uuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  company     String
+  role        String
+  startDate   String?
+  endDate     String?
+  description String?
+}
+
+model Skill {
+  id         String           @id @default(uuid())
+  name       String           @unique
+  candidates CandidateSkill[]
+}
+
+model CandidateSkill {
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  skillId     String
+  skill       Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  proficiency String?
+
+  @@id([candidateId, skillId])
+}
+
+model ScreeningResult {
+  id                 String    @id @default(uuid())
+  candidateId        String
+  candidate          Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobId              String
+  job                Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  score              Int
+  recommendation     String    // "Strong Match" | "Good Match" | "Partial Match" | "Weak Match"
+  summary            String
+  strengths          String    // Stored as JSON string in SQLite
+  missingSkills      String    // Stored as JSON string in SQLite
+  relevantExperience String    // Stored as JSON string in SQLite
+  concerns           String    // Stored as JSON string in SQLite
+  scoreBreakdown     String    // Stored as JSON string in SQLite
+  createdAt          DateTime  @default(now())
+}
