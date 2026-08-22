@@ -276,9 +276,9 @@ export class CandidateController {
       });
 
       // Parse JSON strings in screening histories before returning
-      const formattedCandidates = candidates.map((candidate) => ({
+      const formattedCandidates = candidates.map((candidate: any) => ({
         ...candidate,
-        screenings: candidate.screenings.map(s => CandidateController.formatScreening(s)),
+        screenings: candidate.screenings.map((s: any) => CandidateController.formatScreening(s)),
       }));
 
       return res.status(200).json({
@@ -328,7 +328,7 @@ export class CandidateController {
       // Parse JSON strings in screenings
       const formattedCandidate = {
         ...candidate,
-        screenings: candidate.screenings.map(s => CandidateController.formatScreening(s)),
+        screenings: candidate.screenings.map((s: any) => CandidateController.formatScreening(s)),
       };
 
       return res.status(200).json({

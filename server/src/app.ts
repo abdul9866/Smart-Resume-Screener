@@ -41,12 +41,14 @@ app.get('/api/health', (req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`=========================================`);
-  console.log(`Smart Resume Screener Backend running...`);
-  console.log(`Port: ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`=========================================`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`=========================================`);
+    console.log(`Smart Resume Screener Backend running...`);
+    console.log(`Port: ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`=========================================`);
+  });
+}
 
 export default app;

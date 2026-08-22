@@ -72,7 +72,7 @@ export class JobController {
       });
 
       // Format counts and parse requirements JSON for response
-      const formattedJobs = jobs.map((job) => ({
+      const formattedJobs = jobs.map((job: any) => ({
         id: job.id,
         title: job.title,
         description: job.description,
@@ -162,7 +162,7 @@ export class JobController {
       });
 
       // Parse JSON strings back into JS arrays/objects before returning
-      const formattedResults = results.map((result) => ({
+      const formattedResults = results.map((result: any) => ({
         ...result,
         strengths: JSON.parse(result.strengths as string || '[]'),
         missingSkills: JSON.parse(result.missingSkills as string || '[]'),
