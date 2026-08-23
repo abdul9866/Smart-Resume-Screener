@@ -60,7 +60,7 @@ export class LlmService {
       (process.env.OPENAI_BASE_URL && process.env.OPENAI_BASE_URL.includes('generativelanguage.googleapis.com'));
 
     if (isGemini) {
-      const model = process.env.OPENAI_MODEL || 'gemini-1.5-flash';
+      const model = process.env.OPENAI_MODEL || 'gemini-3.6-flash';
       // Strip trailing slash if present to avoid double-slashes
       const cleanBase = 'https://generativelanguage.googleapis.com/v1beta';
       const url = `${cleanBase}/models/${model}:generateContent?key=${apiKey}`;
