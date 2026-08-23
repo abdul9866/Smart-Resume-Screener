@@ -181,6 +181,28 @@ export default function JobScreen() {
               </div>
             )}
 
+            <div className="border-t border-slate-100 pt-4 space-y-2">
+              <h4 className="text-xs font-semibold text-slate-500">Public Application Link</h4>
+              <div className="flex items-center space-x-1.5">
+                <input
+                  type="text"
+                  readOnly
+                  value={`${window.location.origin}/apply/${job.id}`}
+                  className="block w-full rounded bg-slate-50 border border-slate-200 px-2 py-1 text-[10px] text-slate-600 focus:outline-none"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/apply/${job.id}`);
+                    alert('Copied application link to clipboard!');
+                  }}
+                  className="rounded bg-blue-600 px-2 py-1 text-[10px] font-semibold text-white hover:bg-blue-700 transition"
+                >
+                  Copy
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-400">Share this link with candidates. They can apply and upload resumes securely.</p>
+            </div>
+
             <div className="border-t border-slate-100 pt-4">
               <h4 className="text-xs font-semibold text-slate-500 mb-1">Full Description</h4>
               <p className="text-[11px] text-slate-400 line-clamp-6 leading-relaxed whitespace-pre-line">
