@@ -30,22 +30,9 @@ export class LlmService {
   }
 
   /**
-   * Helper to request JSON output from the LLM, cleansing markdown wrappers if present.
+   * Cleans markdown wrapper formatting (e.g. ```json ... ```) and parses JSON.
    */
-  private static async requestJson(promptText: string): Promise<any> {
-    const client = this.getClient();
-    const response = await client.chat.completions.create({
-      model: this.modelName,
-      messages: [{ role: 'user', content: promptText }],
-      temperature: 0.1, // low temperature for consistent JSON structured outputs
-    });
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('Received empty response from the LLM.');
-    }
-
-    // Clean any markdown wrapper formatting (e.g. ```json ... ```)
+  private static parseAndCleanJson(content: string): any {
     const cleanedContent = content
       .replace(/^```json\s*/i, '')
       .replace(/^```\s*/, '')
@@ -58,6 +45,63 @@ export class LlmService {
       console.error('Failed to parse JSON response from LLM:', content);
       throw new Error(`LLM did not return valid JSON: ${error.message}`);
     }
+  }
+
+  /**
+   * Helper to request JSON output from the LLM, supporting both native Gemini and standard OpenAI.
+   */
+  private static async requestJson(promptText: string): Promise<any> {
+    const apiKey = process.env.OPENAI_API_KEY || '';
+
+    // Automatically route to native Gemini REST API if using a Gemini key or base URL
+    const isGemini =
+      apiKey.startsWith('AQ.') ||
+      apiKey.startsWith('AIzaSy') ||
+      (process.env.OPENAI_BASE_URL && process.env.OPENAI_BASE_URL.includes('generativelanguage.googleapis.com'));
+
+    if (isGemini) {
+      const model = process.env.OPENAI_MODEL || 'gemini-1.5-flash';
+      // Strip trailing slash if present to avoid double-slashes
+      const cleanBase = 'https://generativelanguage.googleapis.com/v1beta';
+      const url = `${cleanBase}/models/${model}:generateContent?key=${apiKey}`;
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { temperature: 0.1 },
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Gemini Native API error: ${res.status} - ${JSON.stringify(errorData)}`);
+      }
+
+      const data: any = await res.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!content) {
+        throw new Error('Received empty response from Gemini Native API.');
+      }
+
+      return this.parseAndCleanJson(content);
+    }
+
+    // Default: Fallback to standard OpenAI SDK
+    const client = this.getClient();
+    const response = await client.chat.completions.create({
+      model: this.modelName,
+      messages: [{ role: 'user', content: promptText }],
+      temperature: 0.1, // low temperature for consistent JSON structured outputs
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('Received empty response from the LLM.');
+    }
+
+    return this.parseAndCleanJson(content);
   }
 
   /**
