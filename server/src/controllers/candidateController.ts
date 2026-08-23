@@ -341,6 +341,74 @@ export class CandidateController {
   }
 
   /**
+   * Get candidate profile and screening history by email.
+   */
+  public static async getByEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.params;
+
+      const candidate = await prisma.candidate.findFirst({
+        where: { email },
+        include: {
+          screenings: {
+            include: { job: { select: { title: true } } },
+          },
+        },
+      });
+
+      if (!candidate) {
+        return res.status(200).json({
+          success: true,
+          data: null,
+        });
+      }
+
+      const formattedCandidate = {
+        ...candidate,
+        screenings: candidate.screenings.map((s: any) => CandidateController.formatScreening(s)),
+      };
+
+      return res.status(200).json({
+        success: true,
+        data: formattedCandidate,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get a single screening result by ID.
+   */
+  public static async getScreeningById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const screening = await prisma.screeningResult.findUnique({
+        where: { id },
+        include: {
+          job: { select: { title: true, description: true } },
+          candidate: { select: { name: true, email: true, phone: true } },
+        },
+      });
+
+      if (!screening) {
+        return res.status(404).json({
+          success: false,
+          error: 'Screening result not found.',
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: CandidateController.formatScreening(screening),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Delete candidate and all relations.
    */
   public static async deleteCandidate(req: Request, res: Response, next: NextFunction) {
