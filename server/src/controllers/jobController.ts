@@ -179,4 +179,59 @@ export class JobController {
       next(error);
     }
   }
+
+  /**
+   * Export job screening results as a CSV file.
+   */
+  public static async exportJobResults(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const job = await prisma.job.findUnique({
+        where: { id },
+      });
+
+      if (!job) {
+        return res.status(404).json({
+          success: false,
+          error: 'Job description not found.',
+        });
+      }
+
+      const results = await prisma.screeningResult.findMany({
+        where: { jobId: id },
+        orderBy: { score: 'desc' },
+        include: {
+          candidate: {
+            select: {
+              name: true,
+              email: true,
+              phone: true,
+            },
+          },
+        },
+      });
+
+      let csv = '\uFEFFRank,Candidate Name,Email,Phone,Match Score %,Recommendation,Strengths,Key Concerns,Missing Skills\n';
+      results.forEach((r: any, idx: number) => {
+        const strengths = JSON.parse(r.strengths as string || '[]').map((s: string) => s.replace(/"/g, '""')).join('; ');
+        const concerns = JSON.parse(r.concerns as string || '[]').map((c: string) => c.replace(/"/g, '""')).join('; ');
+        const missing = JSON.parse(r.missingSkills as string || '[]').map((m: string) => m.replace(/"/g, '""')).join('; ');
+        
+        const name = r.candidate.name.replace(/"/g, '""');
+        const email = r.candidate.email.replace(/"/g, '""');
+        const phone = (r.candidate.phone || '').replace(/"/g, '""');
+        
+        csv += `${idx + 1},"${name}","${email}","${phone}",${r.score},"${r.recommendation}","${strengths}","${concerns}","${missing}"\n`;
+      });
+
+      const fileName = `${job.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-candidates.csv`;
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+      return res.status(200).send(csv);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

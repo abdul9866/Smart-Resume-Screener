@@ -300,7 +300,18 @@ export default function JobScreen() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-900">Ranked Match Results</h2>
-              <span className="text-xs font-medium text-slate-400">{results.length} candidates screened</span>
+              <div className="flex items-center space-x-3">
+                <span className="text-xs font-medium text-slate-400">{results.length} candidates screened</span>
+                {results.length > 0 && (
+                  <a
+                    href={`${API_BASE}/api/jobs/${id}/export`}
+                    download
+                    className="inline-flex items-center space-x-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 text-xs font-semibold shadow-sm transition"
+                  >
+                    <span>Export CSV</span>
+                  </a>
+                )}
+              </div>
             </div>
 
             {isLoadingResults ? (

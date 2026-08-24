@@ -10,6 +10,7 @@ router.post('/', JobController.createJob);
 router.get('/', JobController.getJobs);
 router.get('/:id', JobController.getJobById);
 router.get('/:id/results', JobController.getJobResults);
+router.get('/:id/export', JobController.exportJobResults);
 
 // Execute candidate screening route for a specific job
 router.post('/:id/screen', upload.array('resumes', 10), CandidateController.screenCandidates);

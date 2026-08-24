@@ -83,6 +83,24 @@ export class CandidateController {
 
           if (existingCandidate) {
             candidateId = existingCandidate.id;
+
+            // Cache check: If resume text matches exactly and we already screened for this job, return cached result!
+            if (existingCandidate.resumeText === cleanedText) {
+              const existingScreening = await prisma.screeningResult.findFirst({
+                where: {
+                  candidateId,
+                  jobId,
+                },
+                include: { candidate: true },
+              });
+
+              if (existingScreening) {
+                console.log(`[Screening] Match result found in database cache for candidate ${email} on job ${jobId}. Bypassing matching engine!`);
+                screeningResults.push(CandidateController.formatScreening(existingScreening));
+                continue;
+              }
+            }
+
             console.log(`[Screening] Updating existing candidate: ${name} (${email})`);
 
             await prisma.candidate.update({
